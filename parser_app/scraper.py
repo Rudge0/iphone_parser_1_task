@@ -1,3 +1,5 @@
+import pprint
+
 import requests
 from bs4 import BeautifulSoup
 import os
@@ -33,11 +35,11 @@ def scrape_product(url: str) -> Product:
     html = fetch_page(url)
     soup = BeautifulSoup(html, "html.parser")
 
-    # Ім'я товару
+    # Product main
     full_name_tag = soup.find("h1", class_="desktop-only-title")
     full_name = full_name_tag.text.strip() if full_name_tag else "Без назви"
 
-    # Колір та кількість пам'яті
+    # Color and memory
     color = None
     memory = None
 
@@ -49,7 +51,7 @@ def scrape_product(url: str) -> Product:
             color = p.capitalize()
 
 
-    # Ціна
+    # Price
     price_regular = parse_price(soup.find("div", class_="price-wrapper").text)
 
     try:
@@ -59,12 +61,12 @@ def scrape_product(url: str) -> Product:
         price_discount = None
 
 
-    # Код товару
+    # Product code
     code_tag = soup.find("span", class_="br-pr-code-val")
     product_code = code_tag.text.strip() if code_tag else None
 
 
-    # Кількість відгуків
+    # Reviews amount
     reviews_count = 0
     try:
         reviews_link = (soup.select_one('a.scroll-to-element[href="#reviews-list"]')
@@ -78,7 +80,7 @@ def scrape_product(url: str) -> Product:
     except:
         reviews_count = 0
 
-    # Характеристики
+    # Characteristics
     characteristics = {}
     sections = soup.select("div.br-pr-chr-item")
 
@@ -91,16 +93,16 @@ def scrape_product(url: str) -> Product:
             characteristics[name] = link
 
 
-    # Діагональ екрана
+    # Screen diagonal
     screen_diagonal = characteristics.get("Діагональ екрану")
 
-    # Дисплей екрана
+    # Screen resolution
     screen_resolution = characteristics.get("Роздільна здатність екрану")
 
-    # Виробник
+    # Manufacturer
     manufacturer = characteristics.get("Виробник")
 
-    # Створення об'єкта
+    # Creating product
     product = Product.objects.create(
         url=url,
         full_name=full_name,
@@ -115,7 +117,7 @@ def scrape_product(url: str) -> Product:
         screen_resolution=screen_resolution,
     )
 
-    # Характеристики
+    # Storing characteristics
     for name, value in characteristics.items():
         if not name or not value:
             continue
@@ -126,10 +128,10 @@ def scrape_product(url: str) -> Product:
             value=value
         )
 
-    # Фото товару
+    # Product`s photos
     photo_urls = []
 
-    # Основні фото (слайдер)
+    # main photos
     main_images = soup.find_all("img", class_="br-main-img")
     for img in main_images:
         src = img.get("src")
@@ -140,7 +142,7 @@ def scrape_product(url: str) -> Product:
                 src = "https://brain.com.ua" + src
             photo_urls.append(src)
 
-    # Прев'ю фото (зліва)
+    # Preview`s photos
     preview_images = soup.find_all("img", class_="br-pr-img")
     for img in preview_images:
         src = img.get("src")
@@ -151,7 +153,7 @@ def scrape_product(url: str) -> Product:
                 src = "https://brain.com.ua" + src
             photo_urls.append(src)
 
-    # Запис у БД
+    # Storing into bd
     for url in photo_urls:
         ProductPhoto.objects.create(product=product, url=url)
 
@@ -166,6 +168,8 @@ def scrape_product(url: str) -> Product:
     print(f"Кількість відгуків: {reviews_count}")
     print(f"Діагональ екрану: {screen_diagonal}")
     print(f"Розширення дисплею: {screen_resolution}")
+
+    pprint.pprint(characteristics)
 
     return product
 
