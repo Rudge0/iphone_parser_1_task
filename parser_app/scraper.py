@@ -157,17 +157,17 @@ def scrape_product(url: str) -> Product:
     for url in photo_urls:
         ProductPhoto.objects.create(product=product, url=url)
 
-    print(f"Створено продукт: {product.full_name}")
-    print(f"Колір: {color}")
-    print(f"Об'єм пам'яті: {memory}")
-    print(f"Виробник: {manufacturer}")
-    print(f"Звичайна ціна: {price_regular}")
+    print(f"Created product: {product.full_name}")
+    print(f"Color: {color}")
+    print(f"Memory: {memory}")
+    print(f"Manufacturer: {manufacturer}")
+    print(f"Regular price: {price_regular}")
     if price_discount:
-        print(f"Ціна зі знижкою: {price_discount}")
-    print(f"Код товару: {product_code}")
-    print(f"Кількість відгуків: {reviews_count}")
-    print(f"Діагональ екрану: {screen_diagonal}")
-    print(f"Розширення дисплею: {screen_resolution}")
+        print(f"Discount price: {price_discount}")
+    print(f"Product code: {product_code}")
+    print(f"Reviews count: {reviews_count}")
+    print(f"Screen diagonal: {screen_diagonal}")
+    print(f"Screen resolution: {screen_resolution}")
 
     pprint.pprint(characteristics)
 
